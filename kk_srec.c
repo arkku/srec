@@ -119,20 +119,13 @@ srec_end_read (struct srec_state *srec) {
     }
     ++sum; // sum is now 0 if the checksum was correct
 
-    // obtain the address length by obfuscated magic
-    r = srec->data;
-    if (!type || (type & 1)) {
-        eptr = r + 2 + (type & 2); // 16- and 32-bit addresses
-    } else {
-        // the unspecified S4 record arbitrarily falls in this category
-        eptr = r + 3; // 24-bit addresses
-    }
-
     // combine the address bytes
-    while (r != eptr) {
+    r = srec->data;
+    eptr = r + SREC_ADDRESS_BYTE_COUNT(type);
+    do {
         address <<= 8;
-        address |= *r++;
-    }
+        address |= *r;
+    } while (++r != eptr);
 
     r = srec->data + srec->length;
     srec_data_read(srec, type, address, eptr,

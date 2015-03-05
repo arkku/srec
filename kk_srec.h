@@ -137,6 +137,7 @@ extern void srec_data_read(struct srec_state *srec,
 #define SREC_IS_COUNT(rnum)         (((rnum) == 5) || ((rnum) == 6))
 
 // Number of address bytes in a given S-Record type (2-4 for 16-32-bit)
+// (the obfuscated magic formula works for all valid record numbers, 0-3, 5-9)
 #define SREC_ADDRESS_BYTE_COUNT(rnum) (2 + ((!(rnum) || ((rnum) & 1)) ? ((rnum) & 2) : 1))
 
 
