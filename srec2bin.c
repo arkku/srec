@@ -1,5 +1,5 @@
 /*
- * srec2bin.c: Read Motorola HEX format, write binary data.
+ * srec2bin.c: Read Motorola SREC format, write binary data.
  *
  * By default reads from stdin and writes to stdout. The command-line
  * options `-i` and `-o` can be used to specify the input and output
