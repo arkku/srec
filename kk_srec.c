@@ -65,7 +65,7 @@ srec_read_byte (struct srec_state *srec, char byte) {
         b = (srec->data[srec->length] |= b);
         switch (state >> 1) {
         default:
-            // remain in initial state while waiting for :
+            // remain in initial state while waiting for S
             return;
         case (READ_COUNT_LOW >> 1):
             srec->byte_count = b;
