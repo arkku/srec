@@ -36,6 +36,8 @@
  *              (void) fclose(outfile);
  *          }
  *      }
+ *
+ * For a more complete implementation, see `srec2bin.c`.
  * 
  *
  * Copyright (c) 2015 Kimmo Kulovesi, http://arkku.com/
@@ -46,19 +48,34 @@
 #ifndef KK_SREC_H
 #define KK_SREC_H
 
-#define KK_SREC_VERSION "2015-03-04"
+#define KK_SREC_VERSION "2015-03-05"
 
 #include <stdint.h>
 
 typedef uint_least32_t srec_address_t;
 typedef int srec_count_t;
 typedef uint_fast8_t srec_bool_t;
+
+enum srec_record_number {
+    SREC_HEADER             = 0,    // header with ASCII data
+    SREC_DATA_16BIT         = 1,    // payload with 16-bit address
+    SREC_DATA_24BIT         = 2,    // payload with 24-bit address
+    SREC_DATA_32BIT         = 3,    // payload with 32-bit address
+    SREC_COUNT_16BIT        = 5,    // 16-bit count of payload records
+    SREC_COUNT_24BIT        = 6,    // 24-bit count of payload records
+    SREC_TERMINATION_32BIT  = 7,    // termination & 32-bit start address
+    SREC_TERMINATION_24BIT  = 8,    // termination & 24-bit start address
+    SREC_TERMINATION_16BIT  = 9     // termination & 16-bit start address
+};
+
 typedef uint_fast8_t srec_record_number_t;
 
 // Maximum supported byte count field value - in theory it is possible to
 // have values up to 255, but there is some documentation that specifies 37
 // as the limit (this translates to a maximum of 2+2+74 = 78 total characters
-// on a line)
+// on a line). Specifying a lower length saves memory by making the data
+// structure smaller (handy for small embedded systems), but causes an error
+// if the input byte count exceeds the limit.
 #ifndef SREC_LINE_MAX_BYTE_COUNT
 #define SREC_LINE_MAX_BYTE_COUNT 37
 #endif
@@ -92,15 +109,35 @@ void srec_end_read(struct srec_state *srec);
 //      data            - Pointer to the start of the data payload
 //      length          - Length of data
 //      checksum_error  - 0 iff the checksum was valid, non-zero on error
+//
+// The `data` array may be modified at will, the last writable index being
+// `data[length]` (even though the last data byte read is one index earlier).
+//
+// Note that while the interpreted record is passed entirely as arguments,
+// the raw data is available in the `srec` structure, which includes the
+// address and checksum as part of data. One may also wish to check that
+// `srec->length` and `srec->byte_count` are equal - otherwise there is an
+// error (such as truncated input).
 extern void srec_data_read(struct srec_state *srec,
                            srec_record_number_t record_type,
                            srec_address_t address,
                            uint8_t *data, srec_count_t length,
                            srec_bool_t checksum_error);
 
+// Is the S-Record type a header record?
 #define SREC_IS_HEADER(rnum)        (!(rnum))
+
+// Is the S-Record type a payload data record?
 #define SREC_IS_DATA(rnum)          ((rnum) && ((rnum) <= 3))
+
+// Is the S-Record type a termination + start address record?
 #define SREC_IS_TERMINATION(rnum)   ((rnum) >= 7)
+
+// Is the S-Record type a record count record?
 #define SREC_IS_COUNT(rnum)         (((rnum) == 5) || ((rnum) == 6))
+
+// Number of address bytes in a given S-Record type (2-4 for 16-32-bit)
+#define SREC_ADDRESS_BYTE_COUNT(rnum) (2 + ((!(rnum) || ((rnum) & 1)) ?  ((rnum) & 2) : 1))
+
 
 #endif // !KK_SREC_H

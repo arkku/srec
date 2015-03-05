@@ -6,11 +6,10 @@
  * file, respectively. Specifying an output file allows sparse writes.
  *
  * NOTE: Many SREC files produced by compilers/etc have data beginning
- * at an address greater than zero, potentially causing very
- * unnecessarily large files to be created. The command-line option
- * `-a` can be used to specify the start address of the output file,
- * i.e., the value will be subtracted from the SREC addresses (the
- * result must not be negative).
+ * at an address greater than zero, potentially causing initial padding
+ * in the output (up to gigabytes of unnecessary length). The command-line
+ * option `-a` can be used to specify an offset, i.e., the value will be
+ * subtracted from the SREC addresses (the result must not be negative).
  *
  * Alternatively, the command-line option `-A` sets the address offset
  * to the first address that would be written (i.e., first byte of
@@ -31,7 +30,7 @@
 #define AUTODETECT_ADDRESS (~(srec_address_t)0)
 
 static FILE *outfile;
-static unsigned long line_number = 1L;
+static unsigned long line_number = 1UL;
 static srec_address_t file_position = 0L;
 static srec_address_t address_offset = 0;
 static bool debug_enabled = 0;
@@ -133,6 +132,12 @@ srec_data_read(struct srec_state *srec,
         (void) fprintf(stderr, "Checksum error on line %lu\n", line_number);
         exit(EXIT_FAILURE);
     }
+    if (srec->length != srec->byte_count) {
+        (void) fprintf(stderr,
+                       "Incomplete record or wrong byte count on line %lu\n",
+                       line_number);
+        exit(EXIT_FAILURE);
+    }
     if (SREC_IS_DATA(record_type)) {
         if (!outfile) {
             (void) fprintf(stderr, "Excess data after end of file record\n");
@@ -180,6 +185,11 @@ srec_data_read(struct srec_state *srec,
         }
         file_position += (srec_address_t) length;
     } else if (SREC_IS_TERMINATION(record_type)) {
+        if (address) {
+            (void) fprintf(stderr, "Program start address: 0x%0*lx\n",
+                           SREC_ADDRESS_BYTE_COUNT(record_type) * 2,
+                           (unsigned long) address);
+        }
         if (debug_enabled) {
             (void) fprintf(stderr, "%lu bytes written\n",
                            (unsigned long) file_position);
@@ -188,5 +198,9 @@ srec_data_read(struct srec_state *srec,
             (void) fclose(outfile);
         }
         outfile = NULL;
+    } else if (record_type == 0) {
+        data[length] = '\0';
+        (void) fprintf(stderr, "Header on line %lu: %s\n",
+                       line_number, data);
     }
 }
