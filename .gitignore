@@ -1,0 +1,6 @@
+*.o
+*.a
+srec2bin
+xcuserdata
+*.xcodeproj/*.xcworkspace
+build/
