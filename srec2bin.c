@@ -21,6 +21,8 @@
  */
 
 #include "kk_srec.h"
+
+#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -199,8 +201,19 @@ srec_data_read(struct srec_state *srec,
         }
         outfile = NULL;
     } else if (record_type == 0) {
-        data[length] = '\0';
-        (void) fprintf(stderr, "Header on line %lu: %s\n",
-                       line_number, data);
+        // Print the header record unless it contains control characters
+        srec_bool_t is_printable = 1;
+        srec_count_t i;
+        for (i = 0; i < length && data[i]; ++i) {
+            if (iscntrl(data[i])) {
+                is_printable = 0;
+                break;
+            }
+        }
+        if (is_printable) {
+            data[length] = '\0';
+            (void) fprintf(stderr, "Header on line %lu: %s\n",
+                           line_number, data);
+        }
     }
 }
