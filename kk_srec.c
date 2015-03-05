@@ -16,7 +16,7 @@
 enum srec_read_state {
     READ_WAIT_FOR_START = 0,
     READ_RECORD_TYPE,
-    READ_GOT_RECORD_TYPE,
+    READ_GOT_RECORD_TYPE,   // dummy to make for alternating "high" and "low"
     READ_COUNT_HIGH,
     READ_COUNT_LOW,
     READ_DATA_HIGH,
@@ -113,7 +113,7 @@ srec_end_read (struct srec_state *srec) {
         return;
     }
 
-    // validate the checksum
+    // validate the checksum (one's complement of 8-bit sum)
     for (eptr = r + sum; r != eptr; ++r) {
         sum += *r;
     }
@@ -121,7 +121,7 @@ srec_end_read (struct srec_state *srec) {
 
     // combine the address bytes
     r = srec->data;
-    eptr = r + SREC_ADDRESS_BYTE_COUNT(type);
+    eptr = r + SREC_ADDRESS_BYTE_COUNT(type); // byte count >= 2
     do {
         address <<= 8;
         address |= *r;
