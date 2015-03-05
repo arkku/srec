@@ -106,8 +106,8 @@ srec_end_read (struct srec_state *srec) {
     uint8_t *r = srec->data;
     uint8_t *eptr;
     srec_address_t address = 0;
-    uint_fast8_t sum = srec->length;
     uint_fast8_t type = (srec->flags & SREC_RECORD_TYPE_MASK) >> 4;
+    uint8_t sum = srec->length;
 
     if (!sum) {
         return;
