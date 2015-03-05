@@ -33,7 +33,6 @@ srec_begin_read (struct srec_state *srec) {
 void
 srec_read_byte (struct srec_state *srec, char byte) {
     uint_fast8_t b = (uint_fast8_t) byte;
-    const uint_fast8_t len = srec->length;
     uint_fast8_t state = (srec->flags & SREC_READ_STATE_MASK);
     srec->flags ^= state; // turn off the old state
 
@@ -56,14 +55,14 @@ srec_read_byte (struct srec_state *srec, char byte) {
         // high nybble, store temporarily at end of data:
         b <<= 4;
         if (state != READ_GOT_RECORD_TYPE) {
-            srec->data[len] = b;
+            srec->data[srec->length] = b;
         } else {
             ++state;
             srec->flags = b;
         }
     } else {
         // low nybble, combine with stored high nybble:
-        b = (srec->data[len] |= b);
+        b = (srec->data[srec->length] |= b);
         switch (state >> 1) {
         default:
             // remain in initial state while waiting for :
@@ -78,8 +77,7 @@ srec_read_byte (struct srec_state *srec, char byte) {
 #endif
             break;
         case (READ_DATA_LOW >> 1):
-            if (len < srec->byte_count) {
-                ++(srec->length);
+            if (++(srec->length) < srec->byte_count) {
                 state = READ_DATA_HIGH;
                 goto save_read_state;
             }
@@ -124,10 +122,10 @@ srec_end_read (struct srec_state *srec) {
     // obtain the address length by obfuscated magic
     r = srec->data;
     if (!type || (type & 1)) {
-        eptr = r + 2 + (type & 2);
+        eptr = r + 2 + (type & 2); // 16- and 32-bit addresses
     } else {
         // the unspecified S4 record arbitrarily falls in this category
-        eptr = r + 3;
+        eptr = r + 3; // 24-bit addresses
     }
 
     // combine the address bytes
@@ -136,9 +134,9 @@ srec_end_read (struct srec_state *srec) {
         address |= *r++;
     }
 
-    r = srec->data + srec->length - 1;
+    r = srec->data + srec->length;
     srec_data_read(srec, type, address, eptr,
-                   (srec_count_t)((r > eptr) ? (r - eptr) : 0), sum);
+                   (srec_count_t) ((r > eptr) ? ((r - eptr) - 1) : 0), sum);
 
     srec->flags = 0;
     srec->length = 0;
