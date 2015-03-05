@@ -185,7 +185,7 @@ srec_data_read(struct srec_state *srec,
         }
         file_position += (srec_address_t) length;
     } else if (SREC_IS_TERMINATION(record_type)) {
-        if (address) {
+        if (address || debug_enabled) {
             (void) fprintf(stderr, "Program start address: 0x%0*lx\n",
                            SREC_ADDRESS_BYTE_COUNT(record_type) * 2,
                            (unsigned long) address);
