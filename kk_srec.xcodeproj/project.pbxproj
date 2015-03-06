@@ -84,7 +84,6 @@
 			children = (
 				4E0AFCEF1AA9EB61005C41B1 /* Sources */,
 				4E0AFCFA1AA9EB83005C41B1 /* Supporting Files */,
-				4E0AFD191AA9EC0D005C41B1 /* srec2bin */,
 				4E0AFCE11AA9EB18005C41B1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -117,13 +116,6 @@
 				4E0AFCF41AA9EB73005C41B1 /* srec2bin.1 */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		4E0AFD191AA9EC0D005C41B1 /* srec2bin */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = srec2bin;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -426,6 +418,7 @@
 				4E0AFCED1AA9EB55005C41B1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4E0AFD0E1AA9EBCB005C41B1 /* Build configuration list for PBXNativeTarget "bin2srec" */ = {
 			isa = XCConfigurationList;
@@ -434,6 +427,7 @@
 				4E0AFD101AA9EBCB005C41B1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		4E0AFD1A1AA9EC0D005C41B1 /* Build configuration list for PBXNativeTarget "srec2bin" */ = {
 			isa = XCConfigurationList;
@@ -442,6 +436,7 @@
 				4E0AFD1C1AA9EC0D005C41B1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
