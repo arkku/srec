@@ -4,7 +4,7 @@ LDFLAGS=-Os
 AR=ar
 ARFLAGS=rcs
 
-OBJS = kk_srec.o
+OBJS = kk_srec.o bin2srec.o srec2bin.o
 BINPATH = ./
 LIBPATH = ./
 BINS = $(BINPATH)srec2bin $(BINPATH)bin2srec
