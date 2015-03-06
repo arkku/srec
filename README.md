@@ -6,9 +6,14 @@ A small library for reading the
 (or SREC) format. The library is mainly intended for embedded systems and microcontrollers, such as Arduino, AVR, PIC, ARM, STM32, etc - hence the
 emphasis is on small size rather than features, generality, or error handling.
 
+Also included is a program to convert binary files to SREC format - this
+is not part of the library since writing the format is fairly trivial and
+thus perhaps better hardcoded into embedded applications with the correct
+settings (number of address bytes, etc).
+
 See the header file `kk_srec.h` for documentation, or below for simple examples.
 
-~ [Kimmo Kulovesi](http://arkku.com/), 2015-03-05
+~ [Kimmo Kulovesi](http://arkku.com/), 2015-03-06
 
 Reading
 =======
@@ -57,7 +62,7 @@ The included example program, `srec2bin`, implements a very simple conversion
 from SREC to binary data. Usage by example:
 
     # Simple conversion from SREC to binary:
-    srec2bin <infile.srec >outfile.bin
+    srec2bin <infile.srec -o outfile.bin
 
     # Manually specify the initial address written (i.e., subtract
     # an offset from the input addresses):
@@ -66,6 +71,19 @@ from SREC to binary data. Usage by example:
     # Start output at the first data byte (i.e., make the address offset
     # equal to the address of the first data byte read from input):
     srec2bin -A -i infile.srec -o outfile.bin
+
+The other program, `bin2srec`, converts arbitrary binary files to SREC.
+Usage by example:
+
+    # Simple conversion from binary to SREC (use the least amount of
+    # address bytes necessary):
+    bin2srec -i infile.bin -o outfile.srec
+
+    # Add an offset to the addresses, and specify execution start address:
+    bin2srec -a 0x8000 -x 0x2000 -i infile.bin -o outfile.srec
+
+    # Manually specify the number of address bytes (4 bytes = 32 bits):
+    bin2srec -b 4 -i infile.bin -o outfile.srec
 
 Both programs also accept the option `-v` to increase verbosity.
 

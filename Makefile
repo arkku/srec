@@ -7,8 +7,10 @@ ARFLAGS=rcs
 OBJS = kk_srec.o
 BINPATH = ./
 LIBPATH = ./
-BINS = srec2bin
+BINS = $(BINPATH)srec2bin $(BINPATH)bin2srec
 LIB = $(LIBPATH)libkk_srec.a
+TESTER =
+TESTFILE = $(LIB)
 
 .PHONY: all clean distclean test
 
@@ -23,6 +25,16 @@ $(LIB): $(OBJS)
 
 $(BINPATH)srec2bin: srec2bin.o $(LIB)
 	$(CC) $(LDFLAGS) -o $@ $+
+
+$(BINPATH)bin2srec: bin2srec.o $(LIB)
+	$(CC) $(LDFLAGS) -o $@ $+
+
+test: $(BINPATH)bin2srec $(BINPATH)srec2bin $(TESTFILE)
+	@$(TESTER) $(BINPATH)bin2srec -v -a 0x80000 -h 'test' \
+		-i '$(TESTFILE)' -x 0xFF | \
+	    $(TESTER) $(BINPATH)srec2bin -A -v | \
+	    diff '$(TESTFILE)' -
+	@echo Loopback test success!
 
 $(sort $(BINPATH) $(LIBPATH)):
 	@mkdir -p $@
