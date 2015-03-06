@@ -229,10 +229,6 @@ no_address_length:
     }
 
     // Number of records
-    if (debug_enabled) {
-        (void) fprintf(stderr, "Wrote %lu records\n",
-                       (unsigned long) number_of_records);
-    }
     sum = (number_of_records <= 0xFFFFUL) ? 3 : 4;
     (void) fprintf(outfile, "\nS%x%02x", sum + 2, sum);
     sum += write_word(number_of_records, sum - 1, outfile);
@@ -248,6 +244,10 @@ no_address_length:
         return EXIT_FAILURE;
     }
 
+    if (debug_enabled) {
+        (void) fprintf(stderr, "Wrote %lu records\n",
+                       (unsigned long) number_of_records);
+    }
     if (infile != stdin) {
         (void) fclose(infile);
     }
