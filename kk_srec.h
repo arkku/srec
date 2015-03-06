@@ -48,7 +48,7 @@
 #ifndef KK_SREC_H
 #define KK_SREC_H
 
-#define KK_SREC_VERSION "2015-03-05"
+#define KK_SREC_VERSION "2015-03-06"
 
 #include <stdint.h>
 

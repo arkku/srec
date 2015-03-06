@@ -30,7 +30,8 @@ $(BINPATH)bin2srec: bin2srec.o $(LIB)
 	$(CC) $(LDFLAGS) -o $@ $+
 
 test: $(BINPATH)bin2srec $(BINPATH)srec2bin $(TESTFILE)
-	@$(TESTER) $(BINPATH)bin2srec -v -a 0x80000 -h 'test' \
+	@$(TESTER) $(BINPATH)bin2srec -v -a 0x80000 \
+		-h '123456789_123456789_123456789_1' \
 		-i '$(TESTFILE)' -x 0xFF | \
 	    $(TESTER) $(BINPATH)srec2bin -A -v | \
 	    diff '$(TESTFILE)' -

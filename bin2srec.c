@@ -19,12 +19,12 @@
 
 #define HEX_DIGIT(n) ((char)((n) + (((n) < 10) ? '0' : ('A' - 10))))
 
-#if SREC_LINE_MAX_BYTE_COUNT > 34
+#if SREC_LINE_MAX_BYTE_COUNT >= 37
 #define PAYLOAD_PER_LINE 32
 #else
-#define PAYLOAD_PER_LINE (SREC_LINE_MAX_BYTE_COUNT - 2)
+#define PAYLOAD_PER_LINE (SREC_LINE_MAX_BYTE_COUNT - 5)
 #endif
-#define MAX_HEADER_LENGTH (SREC_LINE_MAX_BYTE_COUNT - 3)
+#define MAX_HEADER_LENGTH (PAYLOAD_PER_LINE - 1)
 
 // Write a byte as hex
 static void
@@ -187,7 +187,7 @@ argument_error:
                 perror("fseek");
             }
 no_address_length:
-            (void) fprintf(stderr, "Notice: Could not determine input size "
+            (void) fprintf(stderr, "Warning: Could not determine input size "
                                    "and no address length (-b) given.\n");
             address_bytes = 4;
         }
@@ -197,18 +197,20 @@ no_address_length:
     // Header
     header_text = header_text ? header_text : "";
     {
-        const size_t len = strlen(header_text);
+        size_t len = strlen(header_text);
         if (len > MAX_HEADER_LENGTH) {
-            (void) fprintf(stderr, "Error: Header text too long (max. %u)!",
-                           MAX_HEADER_LENGTH);
-            return EXIT_FAILURE;
+            (void) fprintf(stderr, "Warning: Header text too long "
+                                   "(max. %u characters)!\n", MAX_HEADER_LENGTH);
+            len = MAX_HEADER_LENGTH;
         }
         sum = (uint8_t) (len + 1 + 2 + 1);
         (void) fprintf(outfile, "S0%02x0000", sum);
-        sum += write_string(header_text, (uint8_t) len + 1, outfile);
+        sum += write_string(header_text, (uint8_t) len, outfile);
+        write_byte('\0', outfile);
         write_byte(~sum, outfile);
         if (debug_enabled && len) {
-            (void) fprintf(stderr, "Wrote header: %s\n", header_text);
+            (void) fprintf(stderr, "Wrote header: %.*s\n",
+                           (int) len, header_text);
         }
     }
 

@@ -130,19 +130,24 @@ srec_data_read(struct srec_state *srec,
                srec_address_t address,
                uint8_t *data, srec_count_t length,
                srec_bool_t error) {
-    if (error) {
-        (void) fprintf(stderr, "Checksum error on line %lu\n", line_number);
+    if (srec->length != srec->byte_count) {
+        if (srec->byte_count > SREC_LINE_MAX_BYTE_COUNT) {
+            (void) fprintf(stderr, "Error: Byte count too high on line %lu\n",
+                           line_number);
+        } else {
+            (void) fprintf(stderr, "Error: Byte count mismatch on line %lu\n",
+                           line_number);
+        }
         exit(EXIT_FAILURE);
     }
-    if (srec->length != srec->byte_count) {
-        (void) fprintf(stderr,
-                       "Incomplete record or wrong byte count on line %lu\n",
+    if (error) {
+        (void) fprintf(stderr, "Error: Checksum mismatch on line %lu\n",
                        line_number);
         exit(EXIT_FAILURE);
     }
     if (SREC_IS_DATA(record_type)) {
         if (!outfile) {
-            (void) fprintf(stderr, "Excess data after end of file record\n");
+            (void) fprintf(stderr, "Error: Excess data after termination\n");
             exit(EXIT_FAILURE);
         }
         if (address < address_offset) {

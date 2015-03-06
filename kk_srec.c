@@ -109,7 +109,7 @@ srec_end_read (struct srec_state *srec) {
     uint_fast8_t type = (srec->flags & SREC_RECORD_TYPE_MASK) >> 4;
     uint8_t sum = srec->length;
 
-    if (!sum) {
+    if (!srec->byte_count) {
         return;
     }
 
@@ -133,4 +133,5 @@ srec_end_read (struct srec_state *srec) {
 
     srec->flags = 0;
     srec->length = 0;
+    srec->byte_count = 0;
 }
