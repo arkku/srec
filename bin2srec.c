@@ -38,13 +38,13 @@ write_byte (const uint8_t byte, FILE * restrict outfile) {
 // Write a word of `word_size` bytes as hex, return the sum of bytes written 
 static int
 write_word (srec_address_t word, uint8_t word_size, FILE * restrict outfile) {
-    int sum = 0;
+    const uint8_t b = word & 0xFF;
+    int sum = b;
     if (--word_size) {
-        sum = write_word(word >> 8, word_size, outfile);
+        sum += write_word(word >> 8, word_size, outfile);
     }
-    uint8_t b = word & 0xFF;
     write_byte(b, outfile);
-    return sum + b;
+    return sum;
 }
 
 // Write a string of length `len` as hex, return the sum of bytes written
@@ -52,7 +52,7 @@ static int
 write_string (const char * restrict str, uint8_t len, FILE * restrict outfile) {
     int sum = 0;
     while (len--) {
-        write_byte(*((uint8_t *)str), outfile);
+        write_byte((*((unsigned char *)str)), outfile);
         sum += *str++;
     }
     return sum;
