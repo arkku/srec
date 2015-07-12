@@ -52,7 +52,7 @@ static int
 write_string (const char * restrict str, uint8_t len, FILE * restrict outfile) {
     int sum = 0;
     while (len--) {
-        write_byte((*((unsigned char *)str)), outfile);
+        write_byte(*((const unsigned char *)str), outfile);
         sum += *str++;
     }
     return sum;
