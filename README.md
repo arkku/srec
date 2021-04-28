@@ -93,3 +93,6 @@ the address offset. Otherwise the program will simply fill any unused
 addresses, starting from 0, with zero bytes, which may total mega- or
 even gigabytes.
 
+Build for Linux ARM
+=============
+The command is make -f mklinux.arm all
