@@ -1,0 +1,44 @@
+CROSS=arm-linux-gnueabi-
+CC=$(CROSS)gcc
+CFLAGS=-Wall -std=c99 -pedantic -Wextra -Wno-unknown-pragmas -Os -mlittle-endian -mthumb -fsingle-precision-constant -ffunction-sections -fdata-sections
+LDFLAGS=-Wl,--gc-sections -static
+AR=$(CROSS)ar
+ARFLAGS=rcs
+
+OBJPATH = ./arm/
+OBJS = kk_srec.o bin2srec.o srec2bin.o
+BINPATH = ./arm/
+LIBPATH = ./arm/
+BINS = $(BINPATH)srec2bin $(BINPATH)bin2srec
+LIB = $(LIBPATH)libkk_srec.a
+TESTER =
+TESTFILE = $(LIB)
+
+.PHONY: all clean distclean test
+
+all: $(BINS) $(LIB)
+
+$(OBJS): kk_srec.h
+$(BINS): | $(BINPATH)
+$(LIB): | $(LIBPATH)
+
+$(LIB): $(OBJS)
+	$(AR) $(ARFLAGS) $@ $+
+
+$(BINPATH)srec2bin: srec2bin.o $(LIB)
+	$(CC) $(LDFLAGS) -o $@ $+
+
+$(BINPATH)bin2srec: bin2srec.o $(LIB)
+	$(CC) $(LDFLAGS) -o $@ $+
+
+
+$(sort $(BINPATH) $(LIBPATH)):
+	@mkdir -p $@
+
+clean:
+	rm -f $(OBJS)
+
+distclean: | clean
+	rm -f $(BINS) $(LIB)
+	@rmdir $(BINPATH) $(LIBPATH) >/dev/null 2>/dev/null || true
+
